@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="description" content="SEO Audit Tool for Developers">
+  <meta name="author" content="Rekt Developer">
+  <title>SEO Builder - Advanced SEO Audit Tool</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Nunito:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5.3 CDN for Responsive Layout -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Font Awesome for Icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+  <!-- SweetAlert for Pop-up Alerts -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <!-- Custom Styles -->
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f4f6f9;
+      margin: 0;
+      padding: 0;
+    }
+
+    .navbar {
+      background-color: #0d6efd;
+      padding: 10px 20px;
+    }
+
+    .navbar-brand {
+      color: white;
+      font-weight: bold;
+    }
+
+    .container {
+      margin-top: 30px;
+    }
+
+    .card {
+      margin-bottom: 20px;
+    }
+
+    .card-header {
+      background-color: #0d6efd;
+      color: white;
+    }
+
+    .card-body {
+      background-color: white;
+    }
+
+    .btn-custom {
+      background-color: #0d6efd;
+      color: white;
+      border-radius: 5px;
+    }
+
+    .btn-custom:hover {
+      background-color: #0b5ed7;
+    }
+
+    .header-title {
+      color: #333;
+      font-weight: 600;
+    }
+
+    .form-container {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .input-url {
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .input-url:focus {
+      border-color: #0d6efd;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <a class="navbar-brand" href="#">SEO Builder</a>
+  </nav>
+
+  <!-- Main Container -->
+  <div class="container">
+    <h2 class="header-title text-center">Advanced SEO Audit Tool</h2>
+
+    <!-- Form to Get URL for Analysis -->
+    <div class="form-container">
+      <h4>Enter a URL to Analyze</h4>
+      <form id="urlForm">
+        <input type="url" id="urlInput" class="form-control input-url" placeholder="https://example.com" required>
+        <br>
+        <button type="submit" class="btn btn-custom">Start Analysis</button>
+      </form>
+    </div>
+
+    <!-- SEO Audit Summary Section -->
+    <div id="seoResults" class="row" style="display: none;">
+      <!-- On-Page SEO -->
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">On-Page SEO</div>
+          <div class="card-body">
+            <p>Title: <span id="seo-title"></span></p>
+            <p>Meta Description: <span id="seo-meta"></span></p>
+            <button class="btn btn-custom" id="seoRecommendations">View Recommendations</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Backlinks -->
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">Backlinks Summary</div>
+          <div class="card-body">
+            <p>Total Backlinks: <span id="backlinks-count">0</span></p>
+            <button class="btn btn-custom" id="backlinksBtn">Analyze Backlinks</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Performance Results (Graph) -->
+    <div class="row" id="performanceResults" style="display: none;">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header">Performance Results (Graph)</div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="performanceChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bootstrap 5.3 JavaScript -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- SweetAlert for Pop-up Alerts -->
+  <script>
+    document.getElementById('urlForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const url = document.getElementById('urlInput').value.trim();
+
+      // Validate URL format
+      const regex = /^(https?:\/\/)?([a-z0-9-]+(\.[a-z0-9-]+)+)(\/[a-z0-9-._~:/?#[\]@!$&'()*+,;=.]+)?$/i;
+      if (!regex.test(url)) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Invalid URL',
+          text: 'Please enter a valid URL (e.g., https://example.com)',
+        });
+        return;
+      }
+
+      // Start the analysis
+      Swal.fire({
+        icon: 'success',
+        title: 'Analysis Started',
+        text: `Analyzing the website: ${url}`,
+      });
+
+      // Call SEO analysis APIs (Google PageSpeed, Free SEO Analysis, etc.)
+      fetchSEOData(url);
+    });
+
+    function fetchSEOData(url) {
+      // Example of calling a free API like PageSpeed Insights (using a proxy to avoid API key requirement)
+      const apiUrl = `https://api.pagespeedinsights.io?url=${encodeURIComponent(url)}&category=performance&category=seo`;
+
+      fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'Unable to fetch SEO data. Please try again later.',
+            });
+            return;
+          }
+
+          // Display SEO and Performance Results
+          displaySEOResults(data.lighthouseResult);
+          displayPerformanceGraph(data.lighthouseResult);
+        })
+        .catch(error => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to fetch data from the API.',
+          });
+        });
+    }
+
+    function displaySEOResults(lighthouseResult) {
+      const seo = lighthouseResult.audits['meta-description'].score * 100;
+      document.getElementById('seo-title').innerText = lighthouseResult.audits['title'].displayValue;
+      document.getElementById('seo-meta').innerText = lighthouseResult.audits['meta-description'].displayValue;
+
+      // Show results
+      document.getElementById('seoResults').style.display = 'block';
+    }
+
+    function displayPerformanceGraph(lighthouseResult) {
+      const performanceScore = lighthouseResult.categories.performance.score * 100;
+
+      const ctx = document.getElementById('performanceChart').getContext('2d');
+      const performanceChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Performance'],
+          datasets: [{
+            label: 'Performance Score',
+            data: [performanceScore],
+            backgroundColor: 'rgba(13, 110, 253, 0.5)',
+            borderColor: 'rgba(13, 110, 253, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+
+      // Show Performance results
+      document.getElementById('performanceResults').style.display = 'block';
+    }
+  </script>
+
+  <!-- Chart.js for Interactive Graphs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</body>
+
+</html>
